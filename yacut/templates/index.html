@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+  <main>
+    <section class="container my-5 px-4">
+      <h1 class="text-center"><span style="color:red">Ya</span>Cut</h1>
+      <p class="text-center my-4">
+        Создайте короткую ссылку автоматически или предложите свой вариант
+      </p>
+
+      <div class="container">
+        <div class="row my-3">
+          <div class="col-sm">
+          </div>
+          <div class="col-sm">
+            <form method="POST" novalidate>
+              {{ form.csrf_token }}
+              {{ form.original_link(class="form-control form-control-lg py-2 mb-3", placeholder="Длинная ссылка")}}<br />
+              {% if form.original_link.errors %}
+                <p><span style="color:red">
+                  {% for error in form.original_link.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </span></p>
+              {% endif %}
+              {{ form.custom_id(class="form-control form-control-lg py-2 mb-3", placeholder="Ваш вариант короткой ссылки") }}<br />
+                {% if form.custom_id.errors %}
+                  <p><span style="color:red">
+                    {% for error in form.custom_id.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </span></p>
+                {% endif %}
+              {{ form.submit(class="btn btn-primary") }}
+              <!-- <div>
+                <div>
+                  <input type="text" class="form-control form-control-lg py-2 mb-3" id="form-title" name=""
+                    placeholder="Длинная ссылка">
+                  <p><span style="color:red">Текст возможной ошибки</span></p>
+                </div>
+                <div>
+                  <input type="url" class="form-control form-control-lg py-2 mb-3" id="form-link" name=""
+                    placeholder="Ваш вариант короткой ссылки">
+                  <p><span style="color:red">Текст возможной ошибки</span></p>
+                </div>
+                <input type="submit" class="btn btn-primary" value="Создать">
+              </div> -->
+            </form>
+          </div>
+          <div class="col-sm">
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="row ">
+          <div class="col-sm">
+          </div>
+          <div class="col-sm">
+            <p class="text-center">
+            <h5 class="text-center">
+              {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                  {% for message in messages %}
+                    {% if custom_id %}
+                      <a href="{{ url_for('redirect_to_url', short_id=custom_id, _external=True) }}">{{ message }}</a>
+                    {% else %}
+                      {{ message }}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+            </h5>
+            </p>
+          </div>
+          <div class="col-sm">
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+{% endblock %}

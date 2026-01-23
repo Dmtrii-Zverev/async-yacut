@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+  <main>
+    <section class="container my-5 px-4">
+      <h1 class="text-center"><span style="color:red">Ya</span>Cut</h1>
+      <p class="text-center my-4">
+        Создайте короткую ссылку автоматически или предложите свой вариант
+      </p>
+
+      <div class="container">
+        <div class="row my-3">
+          <div class="col-sm">
+          </div>
+          <div class="col-sm">
+            <form method="POST" novalidate enctype="multipart/form-data">
+              {{ form.csrf_token }}
+              {{ form.files(class="form-control form-control-lg py-2 mb-3")}}<br />
+              {% if form.files.errors %}
+                <p><span style="color:red">
+                  {% for error in form.files.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </span></p>
+              {% endif %}
+              {{ form.submit(class="btn btn-primary") }}
+            </form>
+          </div>
+          <div class="col-sm">
+          </div>
+        </div>
+      </div>
+      {% if results %}
+        <div class="container mt-5">
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-4">
+                <div class="list-group list-group-flush">
+                  {% for item in results %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 border-bottom">
+                      <span class="text-secondary">{{ item.filename }}</span>
+                      <a href="{{ url_for('redirect_to_url', short_id=item.short_url, _external=True) }}" target="_blank" rel="noreferrer" class="text-decoration-underline text-primary">
+                        {{ item.short_url }}
+                      </a>
+                    </div>
+                  {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+    </section>
+  </main>
+{% endblock %}

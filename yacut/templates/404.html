@@ -1,0 +1,21 @@
+{% extends 'base.html' %} 
+{% block title %}404. Если тут что-то было, теперь этого тут нет.{% endblock %}
+{% block content %}
+<main class="d-flex align-items-center justify-content-center" style="min-height: 75vh;">
+  <section class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 text-center">
+        <h1 class="display-1 fw-bold text-danger mb-4">404</h1>
+        <h2 class="h1 mb-4">Упс</h2>
+        <p class="lead mb-5">тут ничего нет.</p>
+        <div>
+          <a href="{{ url_for('index_view') }}" class="btn btn-primary btn-lg shadow-sm">
+            Вернуться на главную
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

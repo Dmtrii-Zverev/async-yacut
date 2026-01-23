@@ -1,0 +1,27 @@
+{% extends 'base.html' %} 
+{% block title %}500 внутренняя ошибка сервера{% endblock %}
+{% block content %}
+<main class="d-flex align-items-center justify-content-center" style="min-height: 75vh;">
+  <section class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 text-center">
+        <h1 class="display-1 fw-bold text-secondary mb-4">500</h1>
+        <h2 class="h1 mb-4">У нас что-то сломалось...</h2>
+        <p class="lead mb-5">
+            Произошла внутренняя ошибка сервера. 
+            Мы уже в курсе и работаем над исправлением. Попробуйте обновить страницу позже.
+        </p>
+        <div>
+          <a href="javascript:location.reload()" class="btn btn-outline-secondary btn-lg me-2">
+            Обновить
+          </a>
+          <a href="{{ url_for('index_view') }}" class="btn btn-primary btn-lg shadow-sm">
+            На главную
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
