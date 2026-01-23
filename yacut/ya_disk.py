@@ -23,10 +23,10 @@ async def async_upload_files_to_disk(files):
     с использованием одной сессии aiohttp.
 
     Args:
-        files (list): Список объектов файлов (например, FileStorage из Flask/FastAPI).
+        files (list): Список файлов.
 
     Returns:
-        list[str] | None: Список прямых ссылок на загруженные файлы или None, 
+        list[str] | None: Список прямых ссылок на загруженные файлы или None,
                           если список файлов пуст.
     """
 
