@@ -1,7 +1,7 @@
 import string
 import random
 
-from flask import Response, abort, render_template, flash, redirect
+from flask import abort, render_template, flash, redirect
 
 from . import app, db
 from .forms import URLMapForm, FilesForm
@@ -12,7 +12,7 @@ from .ya_disk import async_upload_files_to_disk
 LENGHT_SHORT_ID = 6
 
 
-def get_random_short_id(length_id=LENGHT_SHORT_ID)
+def get_random_short_id(length_id=LENGHT_SHORT_ID):
     """Генерирует случайный идентификатор для формирования коротких ссылок.
 
     Идентификатор формируется из латинских букв (регистрозависимых)
@@ -120,7 +120,7 @@ async def files_view():
 
 
 @app.route('/<string:short_id>')
-def redirect_to_url(short_id: str) -> :
+def redirect_to_url(short_id):
     """ Перенапраляет пользователя на оригинальный источник.
 
         Args:
