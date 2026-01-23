@@ -1,6 +1,8 @@
 import re
+from typing import Tuple
 
-from flask import jsonify, request
+from flask import Response
+from flask import jsonify, request, Response
 
 from . import app, db
 from .models import URLMap
@@ -8,7 +10,11 @@ from .error_handlers import InvalidAPIUsage
 from .views import get_unique_short_id
 
 
-def is_valid_short_id(short_id):
+def is_valid_short_id(short_id: str) -> bool:
+    """
+    Проверяет идентификатор на соответствие символам латиницы и цифрам.
+    """
+
     pattern = r'^[A-Za-z0-9]+$'
     if re.fullmatch(pattern, short_id):
         return True
@@ -16,7 +22,14 @@ def is_valid_short_id(short_id):
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
-def get_original_link(short_id):
+def get_original_link(short_id: str) -> Tuple[Response, int]:
+    """
+    Получает оригинальную ссылку по её короткому идентификатору.
+
+    Raises:
+        InvalidAPIUsage: Если идентификатор не найден в базе данных (404).
+    """
+
     url = URLMap.query.filter_by(short=short_id).first()
     if url is None:
         raise InvalidAPIUsage('Указанный id не найден', 404)
@@ -24,7 +37,18 @@ def get_original_link(short_id):
 
 
 @app.route('/api/id/', methods=['POST'])
-def create_short_link():
+def create_short_link() -> Tuple[Response, int]:
+    """
+    Создает новую короткую ссылку на основе переданных JSON-данных.
+
+    Выполняет валидацию входных данных: проверку на наличие обязательных полей,
+    уникальность ID, допустимую длину и формат символов.
+
+    Raises:
+        InvalidAPIUsage: Если тело запроса пустое, отсутствует url,
+                         предложенный ID некорректен или уже занят.
+    """
+
     data = request.get_json(silent=True)
     if data is None:
         raise InvalidAPIUsage(

@@ -16,6 +16,20 @@ AUTH_HEADERS = {
 
 
 async def async_upload_files_to_disk(files):
+    """
+    Корутина для массовой асинхронной загрузки файлов на Яндекс диск.
+
+    Создает группу задач для одновременной загрузки всех переданных файлов
+    с использованием одной сессии aiohttp.
+
+    Args:
+        files (list): Список объектов файлов (например, FileStorage из Flask/FastAPI).
+
+    Returns:
+        list[str] | None: Список прямых ссылок на загруженные файлы или None, 
+                          если список файлов пуст.
+    """
+
     if files:
         tasks = []
         async with aiohttp.ClientSession() as session:
@@ -30,6 +44,26 @@ async def async_upload_files_to_disk(files):
 
 
 async def upload_file_and_get_url(session, file):
+    """
+    Корутина для поэтапной загрузки одного файла на Яндек диск.
+
+    Процесс включает:
+    1. Запрос ссылки для загрузки (GET).
+    2. Загрузку бинарных данных файла (PUT).
+    3. Получение ссылки для скачивания (GET).
+
+    Args:
+        session (aiohttp.ClientSession): Активная асинхронная сессия.
+        file: Объект файла, имеющий атрибуты `filename` и `stream`.
+
+    Returns:
+        str: Прямая ссылка (href) на файл в облачном хранилище.
+
+    Raises:
+        KeyError: Если в ответе API отсутствуют ожидаемые ключи.
+        aiohttp.ClientError: При сетевых ошибках в процессе запросов.
+    """
+
     payload = {
         'path': f'app:/{file.filename}',  # noqa: E231
         'overwrite': 'True'

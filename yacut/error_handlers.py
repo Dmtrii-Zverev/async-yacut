@@ -15,8 +15,6 @@ class InvalidAPIUsage(Exception):
     def to_dict(self):
         return dict(message=self.message)
 
-# Обработчик кастомного исключения для API.
-
 
 @app.errorhandler(InvalidAPIUsage)
 def invalid_api_usage(error):
