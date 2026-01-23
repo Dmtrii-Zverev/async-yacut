@@ -75,9 +75,11 @@ async def upload_file_and_get_url(session, file):
     ) as response:
         data = await response.json()
         upload_url = data['href']
+    loop = asyncio.get_event_loop()
+    file_data = await loop.run_in_executor(None, file.stream.read)
     async with session.put(
         upload_url,
-        data=file.stream
+        data=file_data
     ) as response:
         location = response.headers['Location']
         location = urllib.parse.unquote(location)
