@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Tuple
+from typing import Tuple, Union
 
 from flask import Response, jsonify, request
 
@@ -13,7 +13,9 @@ MAX_LENGHT_SHORT_ID = 16
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
-def get_original_link(short_id: str) -> Tuple[Response, int | HTTPStatus]:
+def get_original_link(
+    short_id: str
+) -> Tuple[Response, Union[int, HTTPStatus]]:
     """
     Получает оригинальную ссылку по её короткому идентификатору.
 
@@ -28,7 +30,7 @@ def get_original_link(short_id: str) -> Tuple[Response, int | HTTPStatus]:
 
 
 @app.route('/api/id/', methods=['POST'])
-def create_short_link() -> Tuple[Response, int | HTTPStatus]:
+def create_short_link() -> Tuple[Response, Union[int, HTTPStatus]]:
     """
     Создает новую короткую ссылку на основе переданных JSON-данных.
 
