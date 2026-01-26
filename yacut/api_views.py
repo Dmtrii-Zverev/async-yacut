@@ -1,28 +1,19 @@
-import re
+from http import HTTPStatus
 from typing import Tuple
 
-from flask import Response
-from flask import jsonify, request, Response
+from flask import Response, jsonify, request
 
 from . import app, db
-from .models import URLMap
 from .error_handlers import InvalidAPIUsage
+from .models import URLMap
+from .utils import is_valid_short_id
 from .views import get_unique_short_id
 
-
-def is_valid_short_id(short_id: str) -> bool:
-    """
-    Проверяет идентификатор на соответствие символам латиницы и цифрам.
-    """
-
-    pattern = r'^[A-Za-z0-9]+$'
-    if re.fullmatch(pattern, short_id):
-        return True
-    return False
+MAX_LENGHT_SHORT_ID = 16
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
-def get_original_link(short_id: str) -> Tuple[Response, int]:
+def get_original_link(short_id: str) -> Tuple[Response, int | HTTPStatus]:
     """
     Получает оригинальную ссылку по её короткому идентификатору.
 
@@ -32,12 +23,12 @@ def get_original_link(short_id: str) -> Tuple[Response, int]:
 
     url = URLMap.query.filter_by(short=short_id).first()
     if url is None:
-        raise InvalidAPIUsage('Указанный id не найден', 404)
-    return jsonify({'url': url.original}), 200
+        raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
+    return jsonify({'url': url.original}), HTTPStatus.OK
 
 
 @app.route('/api/id/', methods=['POST'])
-def create_short_link() -> Tuple[Response, int]:
+def create_short_link() -> Tuple[Response, int | HTTPStatus]:
     """
     Создает новую короткую ссылку на основе переданных JSON-данных.
 
@@ -70,7 +61,7 @@ def create_short_link() -> Tuple[Response, int]:
     elif (
         short_link == 'files' or
         not is_valid_short_id(short_link) or
-        len(short_link) > 16
+        len(short_link) > MAX_LENGHT_SHORT_ID
     ):
         raise InvalidAPIUsage(
             'Указано недопустимое имя для короткой ссылки'
@@ -85,7 +76,6 @@ def create_short_link() -> Tuple[Response, int]:
     )
     db.session.add(new_url)
     db.session.commit()
-    print(short_link)
     return jsonify(
         {'url': url, 'short_link': request.host_url + short_link}
-    ), 201
+    ), HTTPStatus.CREATED

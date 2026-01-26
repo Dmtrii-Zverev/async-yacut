@@ -1,10 +1,9 @@
+import asyncio
 import urllib
 
 import aiohttp
-import asyncio
 
 from . import app
-
 
 API_HOST = 'https://cloud-api.yandex.net/'
 API_VERSION = 'v1'

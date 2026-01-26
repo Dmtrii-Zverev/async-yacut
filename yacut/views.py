@@ -1,49 +1,10 @@
-import string
-import random
-
-from flask import abort, render_template, flash, redirect
+from flask import flash, redirect, render_template
 
 from . import app, db
-from .forms import URLMapForm, FilesForm
+from .forms import FilesForm, URLMapForm
 from .models import URLMap
+from .utils import get_unique_short_id
 from .ya_disk import async_upload_files_to_disk
-
-
-LENGHT_SHORT_ID = 6
-
-
-def get_random_short_id(length_id=LENGHT_SHORT_ID):
-    """Генерирует случайный идентификатор для формирования коротких ссылок.
-
-    Идентификатор формируется из латинских букв (регистрозависимых)
-    и цифр от 0 до 9.
-
-    Args:
-        length_id (int): Длина генерируемого идентификатора.
-            По умолчанию используется константа LENGHT_SHORT_ID.
-
-    Returns:
-        str: Строка из случайных символов заданной длины.
-    """
-
-    seq = string.digits + string.ascii_letters
-    return ''.join(random.choices(seq, k=length_id))
-
-
-def get_unique_short_id():
-    """Проверяет что сгенерированный индетификатор уникальный.
-
-    Идентификатор создается с помощью функции get_random_short_id
-    после чего проверяется на уникальность в бд.
-
-    Returns:
-        str: Уникальный индетификатор.
-    """
-
-    short_id = get_random_short_id()
-    while URLMap.query.filter_by(short=short_id).first() is not None:
-        short_id = get_random_short_id()
-    return short_id
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -129,7 +90,5 @@ def redirect_to_url(short_id):
             Response: Объект перенаправления
     """
 
-    url = URLMap.query.filter_by(short=short_id).first()
-    if url:
-        return redirect(url.original)
-    abort(404)
+    url = URLMap.query.filter_by(short=short_id).first_or_404()
+    return redirect(url.original)
