@@ -3,7 +3,7 @@ from flask import flash, redirect, render_template
 from . import app, db
 from .forms import FilesForm, URLMapForm
 from .models import URLMap
-from .utils import get_unique_short_id
+from .error_handlers import UniqueError
 from .ya_disk import async_upload_files_to_disk
 
 
@@ -20,26 +20,21 @@ def index_view():
         str: Отрендеренный HTML-шаблон 'index.html'.
     """
     form = URLMapForm()
+    link = None
+
     if form.validate_on_submit():
         original = form.original_link.data
         custom_id = form.custom_id.data
-        if not custom_id:
-            custom_id = get_unique_short_id()
-        elif (
-            custom_id == 'files' or
-            URLMap.query.filter_by(short=custom_id).first() is not None
-        ):
+
+        try:
+            new_url = URLMap.create_short_url(original, custom_id)
+            link = new_url.full_short_url
+            flash('Ваша новая ссылка готова!')
+
+        except (UniqueError, ValueError):
             flash('Предложенный вариант короткой ссылки уже существует.')
-            return render_template('index.html', form=form)
-        url = URLMap(
-            original=original,
-            short=custom_id
-        )
-        db.session.add(url)
-        db.session.commit()
-        flash('Ваша новая ссылка готова!')
-        return render_template('index.html', form=form, custom_id=custom_id)
-    return render_template('index.html', form=form)
+
+    return render_template('index.html', form=form, link=link)
 
 
 @app.route('/files', methods=['GET', 'POST'])
@@ -58,15 +53,12 @@ async def files_view():
         str: Отрендеренный HTML-шаблон 'add_files.html'
         со списком созданных ссылок для скачивания.
     """
-
     form = FilesForm()
     results = []
     if form.validate_on_submit():
         uploaded_urls = await async_upload_files_to_disk(form.files.data)
         for file, url in zip(form.files.data, uploaded_urls):
-            custom_id = get_unique_short_id()
-            while URLMap.query.filter_by(short=custom_id).first() is not None:
-                custom_id = get_unique_short_id()
+            custom_id = URLMap.get_unique_short_id()
             new_map = URLMap(
                 original=url,
                 short=custom_id
@@ -74,7 +66,7 @@ async def files_view():
             db.session.add(new_map)
             results.append({
                 'filename': file.filename,
-                'short_url': custom_id
+                'link': new_map.full_short_url
             })
         db.session.commit()
     return render_template('add_files.html', form=form, results=results)
@@ -89,6 +81,5 @@ def redirect_to_url(short_id):
         Returns:
             Response: Объект перенаправления
     """
-
     url = URLMap.query.filter_by(short=short_id).first_or_404()
     return redirect(url.original)

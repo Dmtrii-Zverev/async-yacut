@@ -4,6 +4,13 @@ from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 
+from .constants import (
+    PATTERN,
+    MIN_LENGHT_SHORT_ID,
+    MAX_LENGHT_SHORT_ID
+)
+
+
 class URLMapForm(FlaskForm):
     original_link = URLField(
         'Длинная ссылка',
@@ -12,10 +19,10 @@ class URLMapForm(FlaskForm):
     custom_id = StringField(
         'Ваш вариант короткой ссылки',
         validators=[
-            Length(1, 16),
+            Length(MIN_LENGHT_SHORT_ID, MAX_LENGHT_SHORT_ID),
             Optional(),
             Regexp(
-                r'^[A-Za-z0-9]+$',
+                PATTERN,
                 message='Допустимы только латниские буквы и цифры'
             )
         ]

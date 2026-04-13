@@ -24,6 +24,11 @@ class InvalidAPIUsage(Exception):
         return {'message': self.message}
 
 
+class UniqueError(Exception):
+    """Выбрасывается, когда запись уже существует в системе."""
+    pass
+
+
 @app.errorhandler(InvalidAPIUsage)
 def invalid_api_usage(
     error: InvalidAPIUsage

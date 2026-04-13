@@ -3,11 +3,11 @@ from typing import Tuple, Union
 
 from flask import Response, jsonify, request
 
-from . import app, db
-from .error_handlers import InvalidAPIUsage
+from . import app  # , db
+from .error_handlers import InvalidAPIUsage, UniqueError
 from .models import URLMap
-from .utils import is_valid_short_id
-from .views import get_unique_short_id
+# from .utils import is_valid_short_id
+# from .views import get_unique_short_id
 
 MAX_LENGHT_SHORT_ID = 16
 
@@ -23,7 +23,7 @@ def get_original_link(
         InvalidAPIUsage: Если идентификатор не найден в базе данных (404).
     """
 
-    url = URLMap.query.filter_by(short=short_id).first()
+    url = URLMap.get_short_url(short_id)
     if url is None:
         raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
     return jsonify({'url': url.original}), HTTPStatus.OK
@@ -58,26 +58,16 @@ def create_short_link() -> Tuple[Response, Union[int, HTTPStatus]]:
         raise InvalidAPIUsage(
             '\"url\" является обязательным полем!'
         )
-    if not short_link:
-        short_link = get_unique_short_id()
-    elif (
-        short_link == 'files' or
-        not is_valid_short_id(short_link) or
-        len(short_link) > MAX_LENGHT_SHORT_ID
-    ):
+    try:
+        new_url = URLMap.create_short_url(url, short_link)
+    except ValueError:
         raise InvalidAPIUsage(
             'Указано недопустимое имя для короткой ссылки'
         )
-    elif URLMap.query.filter_by(short=short_link).first() is not None:
+    except UniqueError:
         raise InvalidAPIUsage(
             'Предложенный вариант короткой ссылки уже существует.'
         )
-    new_url = URLMap(
-        original=url,
-        short=short_link
-    )
-    db.session.add(new_url)
-    db.session.commit()
     return jsonify(
-        {'url': url, 'short_link': request.host_url + short_link}
+        {'url': url, 'short_link': new_url.full_short_url}
     ), HTTPStatus.CREATED
